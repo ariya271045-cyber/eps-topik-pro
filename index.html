@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EPS-TOPIK Korean Learning App</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPS-TOPIK Korean Learning App</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="container">
+<div class="container">
 
+  <div id="home">
     <div class="header">
       <h1>EPS-TOPIK PRO</h1>
       <p>เรียนภาษาเกาหลีเพื่อสอบ EPS-TOPIK</p>
@@ -18,32 +19,181 @@
       <div class="level">ระดับปัจจุบัน: Level 2</div>
       <div class="progress"><div></div></div>
       <p style="margin-top:10px;color:#666;">ความคืบหน้า 25%</p>
-      <button class="btn">เริ่มเรียนต่อ</button>
+      <button class="btn" onclick="showSection('vocab')">เริ่มเรียนต่อ</button>
     </div>
 
     <div class="menu">
-      <div class="card">
+      <div class="card" onclick="showSection('vocab')">
         <h3>📖 คำศัพท์</h3>
         <p>เรียนคำศัพท์ใหม่</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="showSection('grammar')">
         <h3>✏️ ไวยากรณ์</h3>
-        <p>ฝึกไวยากรณ์เกาหลี</p>
+        <p>ฝึกไวยากรณเกาหลี</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="showSection('listening')">
         <h3>🎧 ฟัง-พูด</h3>
         <p>ฝึกฟังและออกเสียง</p>
       </div>
-      <div class="card">
+      <div class="card" onclick="showSection('mocktest')">
         <h3>📝 ข้อสอบจำลอง</h3>
         <p>ทดสอบความรู้</p>
       </div>
     </div>
 
-    <div class="footer">
-      © 2026 EPS-TOPIK PRO
-    </div>
-
+    <div class="footer">© 2026 EPS-TOPIK PRO</div>
   </div>
+
+  <div id="vocab" class="section hidden">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="card">
+      <p id="quiz-progress" class="quiz-progress"></p>
+      <h2 id="quiz-word" class="quiz-word"></h2>
+      <p class="quiz-question">แปลว่าอะไร?</p>
+      <div id="quiz-options"></div>
+      <p id="quiz-feedback" class="quiz-feedback"></p>
+      <button id="next-btn" class="btn hidden" onclick="nextQuestion()">ข้อถัดไป</button>
+    </div>
+  </div>
+
+  <div id="grammar" class="section hidden">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="card">
+      <h2>✏️ ไวยากรณ์</h2>
+      <p style="margin-top:10px;color:#666;">เนื้อหาไวยากรณ์กำลังจะมาเร็วๆ นี้ 🚧</p>
+    </div>
+  </div>
+
+  <div id="listening" class="section hidden">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="card">
+      <h2>🎧 ฟัง-พูด</h2>
+      <p style="margin-top:10px;color:#666;">เนื้อหาฝึกฟัง-พูดกำลังจะมาเร็วๆ นี้ 🚧</p>
+    </div>
+  </div>
+
+  <div id="mocktest" class="section hidden">
+    <button class="back-btn" onclick="goHome()">← กลับ</button>
+    <div class="card">
+      <h2>📝 ข้อสอบจำลอง</h2>
+      <p style="margin-top:10px;color:#666;">ข้อสอบจำลองเต็มรูปแบบกำลังจะมาเร็วๆ นี้ 🚧</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const quizData = [
+  { word: "안녕하세요", correct: "สวัสดี", options: ["สวัสดี", "ขอบคณ", "ลาก่อน", "ขอโทษ"] },
+  { word: "감사합니다", correct: "ขอบคุณ", options: ["สวัสดี", "ขอบคุณ", "ยินดี", "ขอโทษ"] },
+  { word: "회사", correct: "บริษัท", options: ["โรงเรียน", "บริษัท", "โรงพยาบาล", "บ้าน"] },
+  { word: "일하다", correct: "ทำงาน", options: ["กิน", "นอน", "ทำงาน", "เดิน"] },
+  { word: "안전", correct: "ความปลอดภัย", options: ["ความเร็ว", "ความปลอดภัย", "ความสวย", "ความหนัก"] },
+  { word: "월급", correct: "เงินเดือน", options: ["เงินเดือน", "วันหยุด", "อาหาร", "ที่อยู่"] },
+  { word: "기계", correct: "เครื่องจักร", options: ["หนังสือ", "เครื่องจักร", "รถยนต์", "โทรศัพท์"] },
+  { word: "위험", correct: "อันตราย", options: ["สนุก", "อันตราย", "ง่าย", "ถูก"] },
+  { word: "출근", correct: "ไปทำงาน", options: ["ไปทำงาน", "กลับบ้าน", "พักผ่อน", "ไปเที่ยว"] },
+  { word: "퇴근", correct: "เลิกงาน", options: ["เริ่มงาน", "เลิกงาน", "หยุดงาน", "ลางาน"] }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let answered = false;
+
+function shuffle(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+function showSection(id) {
+  document.getElementById('home').classList.add('hidden');
+  document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'vocab') {
+    currentQuestion = 0;
+    score = 0;
+    renderQuestion();
+  }
+}
+
+function goHome() {
+  document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('home').classList.remove('hidden');
+}
+
+function renderQuestion() {
+  answered = false;
+  const q = quizData[currentQuestion];
+  document.getElementById('quiz-progress').textContent = `ข้อ ${currentQuestion + 1} / ${quizData.length} · คะแนน ${score}`;
+  document.getElementById('quiz-word').textContent = q.word;
+  document.getElementById('quiz-feedback').textContent = '';
+  document.getElementById('next-btn').classList.add('hidden');
+
+  const optionsDiv = document.getElementById('quiz-options');
+  optionsDiv.innerHTML = '';
+  const options = shuffle([...q.options]);
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = opt;
+    btn.className = 'quiz-option';
+    btn.onclick = () => checkAnswer(opt, btn);
+    optionsDiv.appendChild(btn);
+  });
+}
+
+function checkAnswer(selected, btn) {
+  if (answered) return;
+  answered = true;
+  const q = quizData[currentQuestion];
+  document.querySelectorAll('.quiz-option').forEach(b => {
+    if (b.textContent === q.correct) b.classList.add('correct');
+    if (b === btn && selected !== q.correct) b.classList.add('wrong');
+    b.disabled = true;
+  });
+
+  if (selected === q.correct) {
+    score++;
+    document.getElementById('quiz-feedback').textContent = '✅ ถูกต้อง!';
+    document.getElementById('quiz-feedback').style.color = '#16a34a';
+  } else {
+    document.getElementById('quiz-feedback').textContent = `❌ ผิด คำตอบคือ "${q.correct}"`;
+    document.getElementById('quiz-feedback').style.color = '#dc2626';
+  }
+
+  document.getElementById('quiz-progress').textContent = `ข้อ ${currentQuestion + 1} / ${quizData.length} · คะแนน ${score}`;
+  document.getElementById('next-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  currentQuestion++;
+  if (currentQuestion >= quizData.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.querySelector('#vocab .card').innerHTML = `
+    <h2>🎉 จบแบบทดสอบ!</h2>
+    <p style="margin-top:15px;font-size:20px;">คะแนนของคุณ: <b style="color:#2563eb;">${score} / ${quizData.length}</b></p>
+    <button class="btn" onclick="restartQuiz()">ทำใหม่</button>
+    <button class="btn" style="background:#888;margin-top:10px;" onclick="goHome()">กลับหน้าแรก</button>
+  `;
+}
+
+function restartQuiz() {
+  document.querySelector('#vocab .card').innerHTML = `
+    <p id="quiz-progress" class="quiz-progress"></p>
+    <h2 id="quiz-word" class="quiz-word"></h2>
+    <p class="quiz-question">แปลว่าอะไร?</p>
+    <div id="quiz-options"></div>
+    <p id="quiz-feedback" class="quiz-feedback"></p>
+    <button id="next-btn" class="btn hidden" onclick="nextQuestion()">ข้อถัดไป</button>
+  `;
+  currentQuestion = 0;
+  score = 0;
+  renderQuestion();
+}
+</script>
 </body>
 </html>
